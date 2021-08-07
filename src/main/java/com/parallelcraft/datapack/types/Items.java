@@ -23,6 +23,7 @@ public class Items {
         Object obj = f.get(null);
         
         Class clsBeh = Main.fetchClass(ITEM_DATA_PATH);
+        JSONObject resultAll = new JSONObject();
 
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
         for(Map.Entry<?, ?> entry : entries) {
@@ -45,7 +46,9 @@ public class Items {
             element.put("craftingRemainingItem", Main.readAndGetID(clsBeh, val, "craftingRemainingItem", REGISTRY_NAME));
             
             result.put("element", element);
-            Main.writePart(OUTPUT_PATH, name, result);
+            resultAll.put(name, result);
         }
+        
+        Main.writePart(OUTPUT_PATH, resultAll);
     }
 }

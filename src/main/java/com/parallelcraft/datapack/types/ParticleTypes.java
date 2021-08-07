@@ -19,6 +19,7 @@ public class ParticleTypes {
         Object obj = f.get(null);
         
         //TODO save all inner variables...
+        JSONObject resultAll = new JSONObject();
 
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
         for(Map.Entry<?, ?> entry : entries) {
@@ -35,7 +36,9 @@ public class ParticleTypes {
             JSONObject element = new JSONObject();
             result.put("element", element);
             
-            Main.writePart(OUTPUT_PATH, name, result);
+            resultAll.put(name, result);
         }
+        
+        Main.writePart(OUTPUT_PATH, resultAll);
     }
 }

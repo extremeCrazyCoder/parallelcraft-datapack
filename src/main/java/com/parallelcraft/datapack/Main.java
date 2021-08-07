@@ -147,9 +147,9 @@ public class Main {
     }
     
     
-    public static void writePart(String globalPath, String fileName, JSONObject data) throws Exception {
-        new File(DESTINATION_PATH + File.separator + globalPath).mkdirs();
-        File target = new File(DESTINATION_PATH + File.separator + globalPath + File.separator + fileName + ".json");
+    public static void writePart(String globalPath, JSONObject data) throws Exception {
+        File target = new File(DESTINATION_PATH + File.separator + globalPath + ".json");
+        target.getParentFile().mkdirs();
         FileWriter writer = new FileWriter(target);
         data.write(writer, 4, 0);
         writer.close();

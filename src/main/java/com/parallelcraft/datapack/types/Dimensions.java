@@ -22,6 +22,7 @@ public class Dimensions {
         Object registry = Main.invokeUnknownReflective(obj.getClass(), obj, "registryOrThrow", Main.readReflective(registryClass, null, REGISTRY_NAME));
         
         Class clsBeh = Main.fetchClass(DIMENSION_DATA_PATH);
+        JSONObject resultAll = new JSONObject();
         
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) registry.getClass().getMethod("entrySet").invoke(registry);
         for(Map.Entry<?, ?> entry : entries) {
@@ -54,7 +55,9 @@ public class Dimensions {
             settings.put("effects", Main.readReflective(clsBeh, val, "effectsLocation").toString());
             
             result.put("element", settings);
-            Main.writePart(OUTPUT_PATH, name, result);
+            resultAll.put(name, result);
         }
+        
+        Main.writePart(OUTPUT_PATH, resultAll);
     }
 }

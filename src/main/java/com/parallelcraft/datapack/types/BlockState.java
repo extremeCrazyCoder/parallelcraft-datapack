@@ -29,6 +29,8 @@ public class BlockState {
         Object blockRegistry = registryClass.getField("BLOCK").get(null);
         Method blRegResKey = blockRegistry.getClass().getMethod("getResourceKey", Object.class);
         
+        JSONObject resultAll = new JSONObject();
+        
         for(Object entry : obj) {
             int id = (int) idMethod.invoke(obj, entry);
             Optional<?> blNamePathOpt = (Optional<?>) blRegResKey.invoke(blockRegistry, Main.readReflective(stHol, entry, "owner"));
@@ -76,7 +78,9 @@ public class BlockState {
             element.put("neighbours", jNeighbours);
             
             result.put("element", element);
-            Main.writePart(OUTPUT_PATH, name, result);
+            resultAll.put(name, result);
         }
+        
+        Main.writePart(OUTPUT_PATH, resultAll);
    }
 }

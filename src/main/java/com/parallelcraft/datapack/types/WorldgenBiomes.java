@@ -22,6 +22,7 @@ public class WorldgenBiomes {
         Object registry = Main.readReflective(regAcc, null, REGISTRY_NAME);
         
         Class clsBeh = Main.fetchClass(BIOME_DATA_PATH);
+        JSONObject resultAll = new JSONObject();
         
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) registry.getClass().getMethod("entrySet").invoke(registry);
         for(Map.Entry<?, ?> entry : entries) {
@@ -116,7 +117,9 @@ public class WorldgenBiomes {
             
             settings.put("effects", effects);
             result.put("element", settings);
-            Main.writePart(OUTPUT_PATH, name, result);
+            resultAll.put(name, result);
         }
+        
+        Main.writePart(OUTPUT_PATH, resultAll);
     }
 }

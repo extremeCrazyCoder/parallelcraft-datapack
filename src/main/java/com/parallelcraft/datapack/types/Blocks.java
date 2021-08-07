@@ -24,6 +24,7 @@ public class Blocks {
         Object obj = f.get(null);
         
         Class clsBeh = Main.fetchClass(BLOCK_SETTINGS_PATH);
+        JSONObject resultAll = new JSONObject();
 
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
         for(Map.Entry<?, ?> entry : entries) {
@@ -52,7 +53,9 @@ public class Blocks {
             element.put("material", Main.findName(Main.readReflective(clsBeh, val, "material"), MATERIAL_PATH));
             
             result.put("element", element);
-            Main.writePart(OUTPUT_PATH, name, result);
+            resultAll.put(name, result);
         }
+        
+        Main.writePart(OUTPUT_PATH, resultAll);
     }
 }
