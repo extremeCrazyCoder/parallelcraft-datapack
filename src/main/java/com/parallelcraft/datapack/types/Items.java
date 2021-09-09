@@ -4,6 +4,7 @@ import com.parallelcraft.datapack.Main;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -23,7 +24,7 @@ public class Items {
         Object obj = f.get(null);
         
         Class clsBeh = Main.fetchClass(ITEM_DATA_PATH);
-        JSONObject resultAll = new JSONObject();
+        JSONArray resultAll = new JSONArray();
 
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
         for(Map.Entry<?, ?> entry : entries) {
@@ -46,7 +47,7 @@ public class Items {
             element.put("craftingRemainingItem", Main.readAndGetID(clsBeh, val, "craftingRemainingItem", REGISTRY_NAME));
             
             result.put("element", element);
-            resultAll.put(name, result);
+            resultAll.put(result);
         }
         
         Main.writePart(OUTPUT_PATH, resultAll);

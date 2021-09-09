@@ -4,6 +4,7 @@ import com.parallelcraft.datapack.Main;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -22,7 +23,7 @@ public class WorldgenBiomes {
         Object registry = Main.readReflective(regAcc, null, REGISTRY_NAME);
         
         Class clsBeh = Main.fetchClass(BIOME_DATA_PATH);
-        JSONObject resultAll = new JSONObject();
+        JSONArray resultAll = new JSONArray();
         
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) registry.getClass().getMethod("entrySet").invoke(registry);
         for(Map.Entry<?, ?> entry : entries) {
@@ -52,9 +53,17 @@ public class WorldgenBiomes {
             effects.put("sky_color", (int) Main.invokeReflective(effObj.getClass(), effObj, "getSkyColor"));
            
             Optional<Integer> grassOverride = (Optional<Integer>) Main.invokeReflective(effObj.getClass(), effObj, "getGrassColorOverride");
-            effects.put("grass_color", grassOverride.orElse((int) Main.invokeReflective(clsBeh, val, "getGrassColorFromTexture")));
+            if(! grassOverride.isEmpty()) {
+                effects.put("grass_color", grassOverride.get());
+            }
             
-            effects.put("foliage_color", (int) Main.invokeReflective(clsBeh, val, "getFoliageColor"));
+            Object grassColorModifier = Main.invokeReflective(effObj.getClass(), effObj, "getGrassColorModifier");
+            effects.put("grass_color_modifier", grassColorModifier.toString());
+            
+            Optional<Integer> foliageOverride = (Optional<Integer>) Main.invokeReflective(effObj.getClass(), effObj, "getFoliageColorOverride");
+            if(! foliageOverride.isEmpty()) {
+                effects.put("foliage_color", foliageOverride.get());
+            }
             effects.put("water_fog_color", (int) Main.invokeReflective(effObj.getClass(), effObj, "getWaterFogColor"));
             effects.put("fog_color", (int) Main.invokeReflective(effObj.getClass(), effObj, "getFogColor"));
             effects.put("water_color", (int) Main.invokeReflective(effObj.getClass(), effObj, "getWaterColor"));
@@ -117,7 +126,7 @@ public class WorldgenBiomes {
             
             settings.put("effects", effects);
             result.put("element", settings);
-            resultAll.put(name, result);
+            resultAll.put(result);
         }
         
         Main.writePart(OUTPUT_PATH, resultAll);

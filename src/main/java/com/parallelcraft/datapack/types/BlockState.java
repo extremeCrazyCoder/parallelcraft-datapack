@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -29,7 +30,7 @@ public class BlockState {
         Object blockRegistry = registryClass.getField("BLOCK").get(null);
         Method blRegResKey = blockRegistry.getClass().getMethod("getResourceKey", Object.class);
         
-        JSONObject resultAll = new JSONObject();
+        JSONArray resultAll = new JSONArray();
         
         for(Object entry : obj) {
             int id = (int) idMethod.invoke(obj, entry);
@@ -41,7 +42,6 @@ public class BlockState {
             
             JSONObject result = new JSONObject();
             result.put("name", name);
-            
             result.put("id", id);
             
             JSONObject element = new JSONObject();
@@ -78,9 +78,9 @@ public class BlockState {
             element.put("neighbours", jNeighbours);
             
             result.put("element", element);
-            resultAll.put(name, result);
+            resultAll.put(result);
         }
         
         Main.writePart(OUTPUT_PATH, resultAll);
-   }
+    }
 }

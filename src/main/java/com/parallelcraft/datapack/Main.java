@@ -4,15 +4,25 @@ import com.parallelcraft.datapack.types.BlockState;
 import com.parallelcraft.datapack.types.Blocks;
 import com.parallelcraft.datapack.types.Dimensions;
 import com.parallelcraft.datapack.types.Items;
+import com.parallelcraft.datapack.types.LootTables;
 import com.parallelcraft.datapack.types.ParticleTypes;
 import com.parallelcraft.datapack.types.WorldgenBiomes;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -73,6 +83,7 @@ public class Main {
         WorldgenBiomes.generateDatapackPart(registryClass);
         ParticleTypes.generateDatapackPart(registryClass);
         BlockState.generateDatapackPart(registryClass);
+        LootTables.generateDatapackPart(registryClass);
     }
     
     public static Object readReflective(Object src, String field) throws Exception {
@@ -146,13 +157,26 @@ public class Main {
         throw new ClassNotFoundException();
     }
     
+    public static void writePart(String globalPath, JSONArray data) throws Exception {
+        if(!globalPath.endsWith(".json")) {
+            globalPath+= ".json";
+        }
+        File target = new File(DESTINATION_PATH + File.separator + globalPath);
+        target.getParentFile().mkdirs();
+        try (FileWriter writer = new FileWriter(target)) {
+            data.write(writer, 4, 0);
+        }
+    }
     
     public static void writePart(String globalPath, JSONObject data) throws Exception {
-        File target = new File(DESTINATION_PATH + File.separator + globalPath + ".json");
+        if(!globalPath.endsWith(".json")) {
+            globalPath+= ".json";
+        }
+        File target = new File(DESTINATION_PATH + File.separator + globalPath);
         target.getParentFile().mkdirs();
-        FileWriter writer = new FileWriter(target);
-        data.write(writer, 4, 0);
-        writer.close();
+        try (FileWriter writer = new FileWriter(target)) {
+            data.write(writer, 4, 0);
+        }
     }
     
     public static void recursiveDelete(File toDelete) {
@@ -178,5 +202,66 @@ public class Main {
             result.put(f.getName(), f.get(instance));
         }
         return result;
+    }
+    
+    /**
+     * List directory contents for a resource folder. Not recursive.
+     * This is basically a brute-force implementation.
+     * Works for regular files and also JARs.
+     * copied from http://www.uofr.net/~greg/java/get-resource-listing.html
+     * 
+     * @author Greg Briggs
+     * @param clazz Any java class that lives in the same place as the resources you want.
+     * @param path Should end with "/", but not start with one.
+     * @return Just the name of each member item, not the full paths.
+     * @throws URISyntaxException 
+     * @throws IOException 
+     */
+    public static String[] getResourceListing(Class clazz, String path, boolean all) throws URISyntaxException, IOException {
+        URL dirURL = clazz.getClassLoader().getResource(path);
+        if (dirURL != null && dirURL.getProtocol().equals("file")) {
+            /* A file path: easy enough */
+            return new File(dirURL.toURI()).list();
+        } 
+
+        if (dirURL == null) {
+            /* 
+             * In case of a jar file, we can't actually find a directory.
+             * Have to assume the same jar as clazz.
+             */
+            String me = clazz.getName().replace(".", "/")+".class";
+            dirURL = clazz.getClassLoader().getResource(me);
+        }
+
+        if (dirURL.getProtocol().equals("jar")) {
+            /* A JAR path */
+            String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+            JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+            Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+            Set<String> result = new HashSet<>(); //avoid duplicates in case it is a subdirectory
+            while(entries.hasMoreElements()) {
+                String name = entries.nextElement().getName();
+                if (name.startsWith(path)) { //filter according to the path
+                    String entry = name.substring(path.length());
+                    if(entry.length() == 0) continue;
+                    if(entry.charAt(0) == '/') {
+                        entry = entry.substring(1);
+                    }
+                    if(!all) {
+                        int checkSubdir = entry.indexOf("/");
+                        if (checkSubdir >= 0) {
+                            // if it is a subdirectory, we just return the directory name
+                            entry = entry.substring(0, checkSubdir);
+                        }
+                    }
+                    if(entry.length() > 0) {
+                        result.add(entry);
+                    }
+                }
+            }
+            return result.toArray(new String[result.size()]);
+        }
+
+        throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
     }
 }
