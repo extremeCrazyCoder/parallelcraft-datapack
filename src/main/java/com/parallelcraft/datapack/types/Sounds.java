@@ -10,17 +10,19 @@ import org.json.JSONObject;
 /**
  * @author extremeCrazyCoder
  */
-public class ParticleTypes {
-    public static final String OUTPUT_PATH = "world/particles";
+public class Sounds {
+    public static final String OUTPUT_PATH = "world/sounds";
     
-    public static final String REGISTRY_NAME = "PARTICLE_TYPE";
+    public static final String SOUND_EVENT_PATH = "net.minecraft.sounds.SoundEvent";
 
+    public static final String REGISTRY_NAME = "SOUND_EVENT";
+    
     public static void generateDatapackPart(Class registryClass) throws Exception {
-        System.out.println("Generating PARTICLES part");
+        System.out.println("Generating SOUNDS part");
         Field f = registryClass.getField(REGISTRY_NAME);
         Object obj = f.get(null);
         
-        //TODO save all inner variables...
+        Class clsBeh = Main.fetchClass(SOUND_EVENT_PATH);
         JSONArray resultAll = new JSONArray();
 
         Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
@@ -34,10 +36,8 @@ public class ParticleTypes {
             Object val = entry.getValue();
             result.put("id", Main.getRegistryID(val, REGISTRY_NAME));
             
-            
             JSONObject element = new JSONObject();
             result.put("element", element);
-            
             resultAll.put(result);
         }
         

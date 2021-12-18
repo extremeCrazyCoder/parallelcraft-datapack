@@ -1,14 +1,7 @@
 package com.parallelcraft.datapack.types;
 
 import com.parallelcraft.datapack.Main;
-import java.io.File;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -38,6 +31,7 @@ public class LootTables {
     public static final String REGISTRY_PATH = "";
 
     public static void generateDatapackPart(Class registryClass) throws Exception {
+        System.out.println("Generating LOOT_TABLES part");
         for(String fName : Main.getResourceListing(registryClass, INPUT_PATH, true)) {
             if(!fName.endsWith(".json")) {
                 System.out.println("Ignoring: /" + INPUT_PATH + fName);

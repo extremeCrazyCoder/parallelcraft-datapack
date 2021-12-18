@@ -18,6 +18,7 @@ public class Dimensions {
     public static final String REGISTRY_NAME = "DIMENSION_TYPE_REGISTRY";
 
     public static void generateDatapackPart(Class registryClass) throws Exception {
+        System.out.println("Generating DIMENSIONS part");
         Class regAcc = Main.fetchClass(REGISTRY_ACCESS_PATH);
         Object obj = Main.invokeReflective(regAcc, null, "builtin");
         Object registry = Main.invokeUnknownReflective(obj.getClass(), obj, "registryOrThrow", Main.readReflective(registryClass, null, REGISTRY_NAME));

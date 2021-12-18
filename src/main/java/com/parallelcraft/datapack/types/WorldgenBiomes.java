@@ -19,6 +19,7 @@ public class WorldgenBiomes {
     public static final String REGISTRY_NAME = "BIOME";
 
     public static void generateDatapackPart(Class registryClass) throws Exception {
+        System.out.println("Generating WORLDGEN_BIOMES part");
         Class regAcc = Main.fetchClass(BUILTIN_REGISTRIES_PATH);
         Object registry = Main.readReflective(regAcc, null, REGISTRY_NAME);
         

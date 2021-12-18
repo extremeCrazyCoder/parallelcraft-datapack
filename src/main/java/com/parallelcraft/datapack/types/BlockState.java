@@ -19,6 +19,7 @@ public class BlockState {
     public static final String STATE_PATH = "net.minecraft.world.level.block.state.StateHolder";
 
     public static void generateDatapackPart(Class registryClass) throws Exception {
+        System.out.println("Generating BLOCK_StATE part");
         Class clsReg = Main.fetchClass(BLOCK_PATH);
         Field f = clsReg.getField("BLOCK_STATE_REGISTRY");
         Iterable<?> obj = (Iterable<?>) f.get(null);

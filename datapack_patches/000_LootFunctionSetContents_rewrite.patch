@@ -1,0 +1,561 @@
+diff -ruN target/pack/loot_tables/blocks/black_shulker_box.json target/pack_patched/loot_tables/blocks/black_shulker_box.json
+--- target/pack/loot_tables/blocks/black_shulker_box.json	2021-11-08 14:49:44.268675255 +0100
++++ target/pack_patched/loot_tables/blocks/black_shulker_box.json	2021-11-08 10:32:33.310017792 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:black_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/blue_shulker_box.json target/pack_patched/loot_tables/blocks/blue_shulker_box.json
+--- target/pack/loot_tables/blocks/blue_shulker_box.json	2021-11-08 14:49:44.200676393 +0100
++++ target/pack_patched/loot_tables/blocks/blue_shulker_box.json	2021-11-08 10:31:39.086353314 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:blue_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/brown_shulker_box.json target/pack_patched/loot_tables/blocks/brown_shulker_box.json
+--- target/pack/loot_tables/blocks/brown_shulker_box.json	2021-11-08 14:49:44.348673916 +0100
++++ target/pack_patched/loot_tables/blocks/brown_shulker_box.json	2021-11-08 10:32:27.994050686 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:brown_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/cyan_shulker_box.json target/pack_patched/loot_tables/blocks/cyan_shulker_box.json
+--- target/pack/loot_tables/blocks/cyan_shulker_box.json	2021-11-08 14:49:44.180676727 +0100
++++ target/pack_patched/loot_tables/blocks/cyan_shulker_box.json	2021-11-08 10:31:43.874323688 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:cyan_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/gray_shulker_box.json target/pack_patched/loot_tables/blocks/gray_shulker_box.json
+--- target/pack/loot_tables/blocks/gray_shulker_box.json	2021-11-08 14:49:44.116677797 +0100
++++ target/pack_patched/loot_tables/blocks/gray_shulker_box.json	2021-11-08 10:31:47.630300446 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:gray_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/green_shulker_box.json target/pack_patched/loot_tables/blocks/green_shulker_box.json
+--- target/pack/loot_tables/blocks/green_shulker_box.json	2021-11-08 14:49:44.208676259 +0100
++++ target/pack_patched/loot_tables/blocks/green_shulker_box.json	2021-11-08 10:32:24.314073456 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:green_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/light_blue_shulker_box.json target/pack_patched/loot_tables/blocks/light_blue_shulker_box.json
+--- target/pack/loot_tables/blocks/light_blue_shulker_box.json	2021-11-08 14:49:44.116677797 +0100
++++ target/pack_patched/loot_tables/blocks/light_blue_shulker_box.json	2021-11-08 10:32:02.634207607 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:light_blue_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/light_gray_shulker_box.json target/pack_patched/loot_tables/blocks/light_gray_shulker_box.json
+--- target/pack/loot_tables/blocks/light_gray_shulker_box.json	2021-11-08 14:49:44.320674385 +0100
++++ target/pack_patched/loot_tables/blocks/light_gray_shulker_box.json	2021-11-08 10:31:57.758237777 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:light_gray_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/lime_shulker_box.json target/pack_patched/loot_tables/blocks/lime_shulker_box.json
+--- target/pack/loot_tables/blocks/lime_shulker_box.json	2021-11-08 14:49:44.204676326 +0100
++++ target/pack_patched/loot_tables/blocks/lime_shulker_box.json	2021-11-08 10:32:41.297968363 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:lime_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/magenta_shulker_box.json target/pack_patched/loot_tables/blocks/magenta_shulker_box.json
+--- target/pack/loot_tables/blocks/magenta_shulker_box.json	2021-11-08 14:49:44.312674519 +0100
++++ target/pack_patched/loot_tables/blocks/magenta_shulker_box.json	2021-11-08 10:29:27.891165119 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:magenta_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/orange_shulker_box.json target/pack_patched/loot_tables/blocks/orange_shulker_box.json
+--- target/pack/loot_tables/blocks/orange_shulker_box.json	2021-11-08 14:49:44.160677062 +0100
++++ target/pack_patched/loot_tables/blocks/orange_shulker_box.json	2021-11-08 10:32:13.858138156 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:orange_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/pink_shulker_box.json target/pack_patched/loot_tables/blocks/pink_shulker_box.json
+--- target/pack/loot_tables/blocks/pink_shulker_box.json	2021-11-08 14:49:44.284674986 +0100
++++ target/pack_patched/loot_tables/blocks/pink_shulker_box.json	2021-11-08 10:32:37.521991728 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:pink_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/purple_shulker_box.json target/pack_patched/loot_tables/blocks/purple_shulker_box.json
+--- target/pack/loot_tables/blocks/purple_shulker_box.json	2021-11-08 14:49:44.264675322 +0100
++++ target/pack_patched/loot_tables/blocks/purple_shulker_box.json	2021-11-08 10:32:10.518158822 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:purple_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/red_shulker_box.json target/pack_patched/loot_tables/blocks/red_shulker_box.json
+--- target/pack/loot_tables/blocks/red_shulker_box.json	2021-11-08 14:49:44.320674385 +0100
++++ target/pack_patched/loot_tables/blocks/red_shulker_box.json	2021-11-08 10:31:31.758398657 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:red_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/shulker_box.json target/pack_patched/loot_tables/blocks/shulker_box.json
+--- target/pack/loot_tables/blocks/shulker_box.json	2021-11-08 14:49:44.228675924 +0100
++++ target/pack_patched/loot_tables/blocks/shulker_box.json	2021-11-08 10:31:25.450437691 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/white_shulker_box.json target/pack_patched/loot_tables/blocks/white_shulker_box.json
+--- target/pack/loot_tables/blocks/white_shulker_box.json	2021-11-08 14:49:44.232675857 +0100
++++ target/pack_patched/loot_tables/blocks/white_shulker_box.json	2021-11-08 10:32:17.546115335 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:white_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
+diff -ruN target/pack/loot_tables/blocks/yellow_shulker_box.json target/pack_patched/loot_tables/blocks/yellow_shulker_box.json
+--- target/pack/loot_tables/blocks/yellow_shulker_box.json	2021-11-08 14:49:44.320674385 +0100
++++ target/pack_patched/loot_tables/blocks/yellow_shulker_box.json	2021-11-08 10:32:06.858181469 +0100
+@@ -22,17 +22,15 @@
+                             "op": "replace",
+                             "source": "LootTableSeed",
+                             "target": "BlockEntityTag.LootTableSeed"
++                        },
++                        {
++                            "op": "replace",
++                            "source": "Items",
++                            "target": "BlockEntityTag.Items"
+                         }
+                     ],
+                     "function": "minecraft:copy_nbt",
+                     "source": "block_entity"
+-                },
+-                {
+-                    "entries": [{
+-                        "name": "minecraft:contents",
+-                        "type": "minecraft:dynamic"
+-                    }],
+-                    "function": "minecraft:set_contents"
+                 }
+             ],
+             "name": "minecraft:yellow_shulker_box",
+@@ -42,4 +40,4 @@
+         "bonus_rolls": 0
+     }],
+     "type": "minecraft:block"
+-}
+\ Kein Zeilenumbruch am Dateiende.
++}
