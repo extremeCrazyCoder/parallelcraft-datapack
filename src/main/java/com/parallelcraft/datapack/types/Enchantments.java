@@ -1,9 +1,10 @@
 package com.parallelcraft.datapack.types;
 
 import com.parallelcraft.datapack.Main;
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.Set;
+import com.parallelcraft.datapack.reflection.MRes;
+import com.parallelcraft.datapack.reflection.ReflectionHelper;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -13,54 +14,55 @@ import org.json.JSONObject;
 public class Enchantments {
     public static final String OUTPUT_PATH = "world/enchantments";
     
-    public static final String ENCHANTMENT_PATH = "net.minecraft.world.item.enchantment.Enchantment";
-
-    public static final String REGISTRY_NAME = "ENCHANTMENT";
+    public static final String REGISTRY_NAME = "ENCHANTMENT_REGISTRY";
     
-    public static void generateDatapackPart(Class registryClass) throws Exception {
+    public static void generateDatapackPart() throws Exception {
         System.out.println("Generating ENCHANTMENTS part");
-        Field f = registryClass.getField(REGISTRY_NAME);
-        Object obj = f.get(null);
         
-        Class clsBeh = Main.fetchClass(ENCHANTMENT_PATH);
+        MRes registry = ReflectionHelper.getRegistry(REGISTRY_NAME);
+        
         JSONArray resultAll = new JSONArray();
-
-        Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
-        for(Map.Entry<?, ?> entry : entries) {
-            Object loc = entry.getKey().getClass().getMethod("location").invoke(entry.getKey());
-            String name = (String) (loc.getClass().getMethod("getPath").invoke(loc));
+        MRes entries = registry.i("entrySet");
+        for(MRes entry : entries) {
+            MRes loc = entry.i("getKey").i("location");
+            String name = loc.i("getPath").aStr();
             
             JSONObject result = new JSONObject();
             result.put("name", name);
             
-            Object val = entry.getValue();
-            result.put("id", Main.getRegistryID(val, REGISTRY_NAME));
+            MRes val = entry.i("getValue");
+            result.put("id", registry.i("getId", val).aI());
             
             JSONObject element = new JSONObject();
-            element.put("rarity", ((Enum<?>) Main.readReflective(clsBeh, val, "rarity")).toString());
-            int minLevel = (int) Main.invokeReflective(clsBeh, val, "getMinLevel");
-            int maxLevel = (int) Main.invokeReflective(clsBeh, val, "getMaxLevel");
+            element.put("rarity", val.f("rarity").get().toString());
+            int minLevel = val.i("getMinLevel").aI();
+            int maxLevel = val.i("getMaxLevel").aI();
             element.put("minLevel", minLevel);
             element.put("maxLevel", maxLevel);
-            element.put("treasureOnly", (boolean) Main.invokeReflective(clsBeh, val, "isTreasureOnly"));
-            element.put("curse", (boolean) Main.invokeReflective(clsBeh, val, "isCurse"));
-            element.put("tradeable", (boolean) Main.invokeReflective(clsBeh, val, "isTradeable"));
-            element.put("discoverable", (boolean) Main.invokeReflective(clsBeh, val, "isDiscoverable"));
+            element.put("treasureOnly", val.i("isTreasureOnly").aB());
+            element.put("curse", val.i("isCurse").aB());
+            element.put("tradeable", val.i("isTradeable").aB());
+            element.put("discoverable", val.i("isDiscoverable").aB());
             
-            JSONArray incompatibleWith = new JSONArray();
-            for(Map.Entry<?, ?> ench : entries) {
-                if(ench.getValue() == val) continue;
-                if(! ((boolean) Main.invokeUnknownReflective(val, "isCompatibleWith", ench.getValue()))) {
-                    incompatibleWith.put(Main.getRegistryID(ench.getValue(), REGISTRY_NAME));
+            List<Integer> incomps = new ArrayList<>();
+            for(MRes ench : entries) {
+                if(ench.i("getValue").get() == val.get()) continue;
+                if(! val.i("isCompatibleWith", ench.i("getValue")).aB()) {
+                    incomps.add(registry.i("getId", ench.i("getValue")).aI());
                 }
+            }
+            incomps = incomps.stream().sorted().toList();
+            JSONArray incompatibleWith = new JSONArray();
+            for(Integer incop : incomps) {
+                incompatibleWith.put(incop);
             }
             element.put("incompatibleWith", incompatibleWith);
             
             JSONArray minCost = new JSONArray();
             JSONArray maxCost = new JSONArray();
             for(int i = minLevel; i < maxLevel; i++) {
-                minCost.put(Main.invokeUnknownReflective(val, "getMinCost", i));
-                maxCost.put(Main.invokeUnknownReflective( val, "getMaxCost", i));
+                minCost.put(val.i("getMinCost", i).aI());
+                maxCost.put(val.i("getMaxCost", i).aI());
             }
             element.put("minCost", minCost);
             element.put("maxCost", maxCost);

@@ -1,9 +1,8 @@
 package com.parallelcraft.datapack.types;
 
 import com.parallelcraft.datapack.Main;
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.Set;
+import com.parallelcraft.datapack.reflection.MRes;
+import com.parallelcraft.datapack.reflection.ReflectionHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,28 +10,27 @@ import org.json.JSONObject;
  * @author extremeCrazyCoder
  */
 public class ParticleTypes {
-    public static final String OUTPUT_PATH = "world/particles";
+    private static final String OUTPUT_PATH = "world/particles";
     
-    public static final String REGISTRY_NAME = "PARTICLE_TYPE";
+    public static final String REGISTRY_NAME = "PARTICLE_TYPE_REGISTRY";
 
-    public static void generateDatapackPart(Class registryClass) throws Exception {
+    public static void generateDatapackPart() throws Exception {
         System.out.println("Generating PARTICLES part");
-        Field f = registryClass.getField(REGISTRY_NAME);
-        Object obj = f.get(null);
+        
+        MRes registry = ReflectionHelper.getRegistry(REGISTRY_NAME);
         
         //TODO save all inner variables...
         JSONArray resultAll = new JSONArray();
-
-        Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
-        for(Map.Entry<?, ?> entry : entries) {
-            Object loc = entry.getKey().getClass().getMethod("location").invoke(entry.getKey());
-            String name = (String) (loc.getClass().getMethod("getPath").invoke(loc));
+        MRes entries = registry.i("entrySet");
+        for(MRes entry : entries) {
+            MRes loc = entry.i("getKey").i("location");
+            String name = loc.i("getPath").aStr();
             
             JSONObject result = new JSONObject();
             result.put("name", name);
             
-            Object val = entry.getValue();
-            result.put("id", Main.getRegistryID(val, REGISTRY_NAME));
+            MRes val = entry.i("getValue");
+            result.put("id", registry.i("getId", val).aI());
             
             
             JSONObject element = new JSONObject();

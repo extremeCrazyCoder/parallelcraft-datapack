@@ -1,9 +1,8 @@
 package com.parallelcraft.datapack.types;
 
 import com.parallelcraft.datapack.Main;
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.Set;
+import com.parallelcraft.datapack.reflection.MRes;
+import com.parallelcraft.datapack.reflection.ReflectionHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,30 +10,27 @@ import org.json.JSONObject;
  * @author extremeCrazyCoder
  */
 public class Sounds {
-    public static final String OUTPUT_PATH = "world/sounds";
+    private static final String OUTPUT_PATH = "world/sounds";
     
-    public static final String SOUND_EVENT_PATH = "net.minecraft.sounds.SoundEvent";
+    public static final String REGISTRY_NAME = "SOUND_EVENT_REGISTRY";
+    public static final String SOUND_TYPE_PATH = "net.minecraft.world.level.block.SoundType";
 
-    public static final String REGISTRY_NAME = "SOUND_EVENT";
-    
-    public static void generateDatapackPart(Class registryClass) throws Exception {
+    public static void generateDatapackPart() throws Exception {
         System.out.println("Generating SOUNDS part");
-        Field f = registryClass.getField(REGISTRY_NAME);
-        Object obj = f.get(null);
         
-        Class clsBeh = Main.fetchClass(SOUND_EVENT_PATH);
+        MRes registry = ReflectionHelper.getRegistry(REGISTRY_NAME);
+        
         JSONArray resultAll = new JSONArray();
-
-        Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
-        for(Map.Entry<?, ?> entry : entries) {
-            Object loc = entry.getKey().getClass().getMethod("location").invoke(entry.getKey());
-            String name = (String) (loc.getClass().getMethod("getPath").invoke(loc));
+        MRes entries = registry.i("entrySet");
+        for(MRes entry : entries) {
+            MRes loc = entry.i("getKey").i("location");
+            String name = loc.i("getPath").aStr();
             
             JSONObject result = new JSONObject();
             result.put("name", name);
             
-            Object val = entry.getValue();
-            result.put("id", Main.getRegistryID(val, REGISTRY_NAME));
+            MRes val = entry.i("getValue");
+            result.put("id", registry.i("getId", val).aI());
             
             JSONObject element = new JSONObject();
             result.put("element", element);

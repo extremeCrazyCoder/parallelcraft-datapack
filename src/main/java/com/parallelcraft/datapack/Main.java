@@ -1,5 +1,7 @@
 package com.parallelcraft.datapack;
 
+import com.parallelcraft.datapack.reflection.MRes;
+import com.parallelcraft.datapack.reflection.ReflectionHelper;
 import com.parallelcraft.datapack.types.BlockMaterials;
 import com.parallelcraft.datapack.types.BlockSoundTypes;
 import com.parallelcraft.datapack.types.BlockState;
@@ -13,29 +15,29 @@ import com.parallelcraft.datapack.types.LootTables;
 import com.parallelcraft.datapack.types.ParticleTypes;
 import com.parallelcraft.datapack.types.Sounds;
 import com.parallelcraft.datapack.types.WorldgenBiomes;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import org.json.JSONArray;
@@ -45,58 +47,57 @@ import org.json.JSONTokener;
 /**
  * Main class that will generate a vanilla like datapack from vanilla jar
  * 
- * Needs to be mapped using vanilla mappings -> decompilation not needed (jar will be invoked via reflection)
- * e.g. using DecompilerMC:
- * python3 main.py --mcversion 1.17 --side server --nauto --clean --download_mapping --remap_mapping --download_jar
- *                 --remap_jar --delete_dep f --decompile f
+ * For development:
+ * python3 main.py --mcversion 1.18.2 --side server --nauto --clean --download_mapping --remap_mapping --download_jar --remap_jar --delete_dep f --decompile --decompiler f
  * 
  * @author extremeCrazyCoder
  */
 public class Main {
-    public static String SOURCE_PATH = "../DecompilerMC/src/1.17-server-temp.jar";
-    public static String DESTINATION_TMP_PATH = "target/pack";
-    public static String DESTINATION_PATCHING_TMP_PATH = "target/pack_patched";
-    public static String DESTINATION_PATH = "../../parallelcraft/src/main/resources/datapack";
-    public static final String ROOT_REGISTRY_PATH = "net.minecraft.core.Registry";
+    public static final String COMPILE_FOR_VERSION = "1.18.2";
     
-    public static Class registryClass;
-    
+    public static final String SOURCE_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+    public static final String TMP_PATH = "target";
+    public static final String DESTINATION_TMP_PATH = TMP_PATH + "/pack";
+    public static final String DESTINATION_PATCHING_TMP_PATH = TMP_PATH + "/pack_patched";
+    public static final String DESTINATION_PATH = "../../parallelcraft/src/main/resources/datapack";
+
+    private static MappingsHelper map;
     public static URLClassLoader clsLoader;
     
-   /**
-     * Find:
-     * Registry.register(Registry.
-     * Registry.registerMapping(Registry.
-     */
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
         try {
+            Downloader.ensureDataDownloaded(COMPILE_FOR_VERSION);
+            map = new MappingsHelper(COMPILE_FOR_VERSION);
+
             recursiveDelete(new File(DESTINATION_TMP_PATH));
             recursiveDelete(new File(DESTINATION_PATCHING_TMP_PATH));
             recursiveDelete(new File(DESTINATION_PATH));
-
+            
             //see https://stackoverflow.com/a/60775
             clsLoader = new URLClassLoader(
-                    new URL[]{new File(SOURCE_PATH).toURI().toURL()},
+                    Downloader.getLibraryURLArray(),
                     new Main().getClass().getClassLoader()
             );
-
+            ReflectionHelper.init(clsLoader, map);
+            
             fakeBootServer();
-            registryClass = Main.fetchClass(ROOT_REGISTRY_PATH);
 
+            //also only export sorted data
+            // sort by name  for everything without an id
             //export data
-            WorldgenBiomes.generateDatapackPart(registryClass);
-            Dimensions.generateDatapackPart(registryClass);
-            ParticleTypes.generateDatapackPart(registryClass);
-            Blocks.generateDatapackPart(registryClass);
-            BlockMaterials.generateDatapackPart(registryClass);
-            BlockSoundTypes.generateDatapackPart(registryClass);
-            BlockState.generateDatapackPart(registryClass);
-            Items.generateDatapackPart(registryClass);
-            ItemTags.generateDatapackPart(registryClass);
-            Enchantments.generateDatapackPart(registryClass);
-            Effects.generateDatapackPart(registryClass);
-            Sounds.generateDatapackPart(registryClass);
-            LootTables.generateDatapackPart(registryClass);
+            WorldgenBiomes.generateDatapackPart();
+            Dimensions.generateDatapackPart();
+            ParticleTypes.generateDatapackPart();
+            Blocks.generateDatapackPart();
+            BlockMaterials.generateDatapackPart();
+            BlockSoundTypes.generateDatapackPart();
+            BlockState.generateDatapackPart();
+            Items.generateDatapackPart();
+            Enchantments.generateDatapackPart();
+            Effects.generateDatapackPart();
+            Sounds.generateDatapackPart();
+            LootTables.generateDatapackPart();
+            ItemTags.generateDatapackPart();
             
             //apply patches
             System.out.println("applying patches");
@@ -120,186 +121,112 @@ public class Main {
         System.exit(0);
     }
     
-    public static final String CONSTANTS_PATH = "net.minecraft.SharedConstants";
-    public static final String CRASH_REPORT_PATH = "net.minecraft.CrashReport";
-    public static final String BOOTSTRAP_PATH = "net.minecraft.server.Bootstrap";
-    public static final String STATIC_TAGS_PATH = "net.minecraft.tags.StaticTags";
-    public static final String REGISTRY_ACCESS_PATH = "net.minecraft.core.RegistryAccess";
-    public static final String LEVEL_STORAGE_SOURCE_PATH = "net.minecraft.world.level.storage.LevelStorageSource";
-    public static final String REPOSITORY_SOURCE_PATH = "net.minecraft.server.packs.repository.RepositorySource";
-    public static final String SERVER_PACKS_SOURCE_PATH = "net.minecraft.server.packs.repository.ServerPacksSource";
-    public static final String FOLDER_REPOSITORY_SOURCE_PATH = "net.minecraft.server.packs.repository.FolderRepositorySource";
-    public static final String LEVEL_RESOURCE_PATH = "net.minecraft.world.level.storage.LevelResource";
-    public static final String PACK_SOURCE_PATH = "net.minecraft.server.packs.repository.PackSource";
-    public static final String PACK_REPOSITORY_PATH = "net.minecraft.server.packs.repository.PackRepository";
-    public static final String PACK_TYPE_PATH = "net.minecraft.server.packs.PackType";
-    public static final String DATAPACK_CONFIG_PATH = "net.minecraft.world.level.DataPackConfig";
-    public static final String MINECRAFT_SERVER_PATH = "net.minecraft.server.MinecraftServer";
-    public static final String SERVER_RESOURCES_PATH = "net.minecraft.server.ServerResources";
-    public static final String COMMANDS_PATH = "net.minecraft.commands.Commands";
-    public static final String UTIL_PATH = "net.minecraft.Util";
-    
-//    public static final String TAG_MANAGER_PATH = "net.minecraft.tags.TagManager";
+    private static final String CONSTANTS_PATH = "net.minecraft.SharedConstants";
+    private static final String CRASH_REPORT_PATH = "net.minecraft.CrashReport";
+    private static final String BOOTSTRAP_PATH = "net.minecraft.server.Bootstrap";
+    private static final String DEDICATED_SERVER_SETTINGS_PATH = "net.minecraft.server.dedicated.DedicatedServerSettings";
+    private static final String LEVEL_STORAGE_SOURCE_PATH = "net.minecraft.world.level.storage.LevelStorageSource";
+    private static final String REPOSITORY_SOURCE_PATH = "net.minecraft.server.packs.repository.RepositorySource";
+    private static final String SERVER_PACKS_SOURCE_PATH = "net.minecraft.server.packs.repository.ServerPacksSource";
+    private static final String LEVEL_RESOURCE_PATH = "net.minecraft.world.level.storage.LevelResource";
+    private static final String PACK_SOURCE_PATH = "net.minecraft.server.packs.repository.PackSource";
+    private static final String FOLDER_REPOSITORY_SOURCE_PATH = "net.minecraft.server.packs.repository.FolderRepositorySource";
+    private static final String PACK_REPOSITORY_PATH = "net.minecraft.server.packs.repository.PackRepository";
+    private static final String PACK_TYPE_PATH = "net.minecraft.server.packs.PackType";
+    private static final String RES_PACK_MULTI_MGR_PATH = "net.minecraft.server.packs.resources.MultiPackResourceManager";
+    private static final String RES_PACK_PACK_TYPE_PATH = "net.minecraft.server.packs.PackType";
+    private static final String REGISTRY_ACCESS_PATH = "net.minecraft.core.RegistryAccess";
+    private static final String RELOAD_SERVER_RES_PATH = "net.minecraft.server.ReloadableServerResources";
+    private static final String COMMANDS_PATH = "net.minecraft.commands.Commands$CommandSelection";
+    private static final String UTIL_PATH = "net.minecraft.Util";
     
     public static void fakeBootServer() throws Exception {
-        Class constantsClass = Main.fetchClass(CONSTANTS_PATH);
-        constantsClass.getDeclaredMethod("tryDetectVersion").invoke(null);
-
-        Class crashReportClass = Main.fetchClass(CRASH_REPORT_PATH);
-        crashReportClass.getDeclaredMethod("preload").invoke(null);
-
-        Class bootsrapClass = Main.fetchClass(BOOTSTRAP_PATH);
-        bootsrapClass.getDeclaredMethod("bootStrap").invoke(null);
-        bootsrapClass.getDeclaredMethod("validate").invoke(null);
+        PrintStream errOrig = System.err;
+        PrintStream outOrig = System.out;
         
-        Class staticTags = Main.fetchClass(STATIC_TAGS_PATH);
-        staticTags.getMethod("bootStrap").invoke(null);
+        ReflectionHelper.c(CONSTANTS_PATH).i("tryDetectVersion");
+        ReflectionHelper.c(CRASH_REPORT_PATH).i("preload");
+        ReflectionHelper.c(BOOTSTRAP_PATH).i("bootStrap");
+        System.setErr(errOrig);
+        System.setOut(outOrig);
+        ReflectionHelper.c(BOOTSTRAP_PATH).i("validate");
         
+        MRes serSettings = ReflectionHelper.c(DEDICATED_SERVER_SETTINGS_PATH).create(Paths.get("server.properties"));
+        MRes levelStorageSource = ReflectionHelper.c(LEVEL_STORAGE_SOURCE_PATH).i("createDefault", new File(".").toPath());
+        MRes levelStorageAccess = levelStorageSource.i("createAccess", "world");
         
-        Object registryAccess = Main.fetchClass(REGISTRY_ACCESS_PATH).getMethod("builtin").invoke(null);
-        Object levelStorageSource = Main.fetchClass(LEVEL_STORAGE_SOURCE_PATH).getMethod("createDefault", Path.class).invoke(null, new File(".").toPath());
-        Object levelStorageAccess = Main.invokeUnknownReflective(levelStorageSource, "createAccess", "world");
-        Object datapackConfig = Main.invokeUnknownReflective(levelStorageAccess, "getDataPacks");
+        Object[] repositorySources = (Object[]) Array.newInstance(ReflectionHelper.c(REPOSITORY_SOURCE_PATH).inst(), 2);
+        repositorySources[0] = ReflectionHelper.c(SERVER_PACKS_SOURCE_PATH).create().get();
+        MRes datapackDir = ReflectionHelper.c(LEVEL_RESOURCE_PATH).f("DATAPACK_DIR");
+        MRes packWorld = ReflectionHelper.c(PACK_SOURCE_PATH).f("WORLD");
+        repositorySources[1] = ReflectionHelper.c(FOLDER_REPOSITORY_SOURCE_PATH).create(levelStorageAccess.i("getLevelPath", datapackDir).as(Path.class).toFile(), packWorld).get();
+        MRes packRepository = ReflectionHelper.c(PACK_REPOSITORY_PATH).create(ReflectionHelper.c(PACK_TYPE_PATH).f("SERVER_DATA"), repositorySources);
         
-        Object[] repositorySources = (Object[]) Array.newInstance(Main.fetchClass(REPOSITORY_SOURCE_PATH), 2);
-        repositorySources[0] = Main.fetchClass(SERVER_PACKS_SOURCE_PATH).getConstructor().newInstance();
-        Object datapackDir = Main.fetchClass(LEVEL_RESOURCE_PATH).getField("DATAPACK_DIR").get(null);
-        Object packWorld = Main.fetchClass(PACK_SOURCE_PATH).getField("WORLD").get(null);
-        repositorySources[1] = Main.invokeConstructor(Main.fetchClass(FOLDER_REPOSITORY_SOURCE_PATH), ((Path) Main.invokeUnknownReflective(levelStorageAccess, "getLevelPath", datapackDir)).toFile(), packWorld);
-        Object packRepository = Main.invokeConstructor(Main.fetchClass(PACK_REPOSITORY_PATH), Main.fetchClass(PACK_TYPE_PATH).getField("SERVER_DATA").get(null), repositorySources);
-        
-        if(datapackConfig == null) {
-            datapackConfig = Main.fetchClass(DATAPACK_CONFIG_PATH).getField("DEFAULT").get(null);
-        }
-        
-        Object datapackConfigNew = Main.invokeUnknownReflective(Main.fetchClass(MINECRAFT_SERVER_PATH), (Object) null, "configurePackRepository", packRepository, datapackConfig, true);
-        CompletableFuture feature = (CompletableFuture) Main.fetchClass(SERVER_RESOURCES_PATH)
-                .getMethod("loadResources", List.class, Main.fetchClass(REGISTRY_ACCESS_PATH),
-                        Main.fetchSubClass(COMMANDS_PATH, "CommandSelection"), int.class, Executor.class, Executor.class)
-                .invoke(null,
-                    Main.invokeUnknownReflective(packRepository, "openAllSelected"),
-                    registryAccess,
-                    Main.fetchSubClass(COMMANDS_PATH, "CommandSelection").getField("DEDICATED").get(null),
-                    2, Main.invokeUnknownReflective(Main.fetchClass(UTIL_PATH), (Object) null, "backgroundExecutor"),
-                    (Executor) Runnable::run);
-        
-        Object serverRes = feature.get();
-        Main.invokeUnknownReflective(serverRes, "updateGlobals");
-    }
-    
-    public static void realBootServer() throws Exception {
-        //fake eula
-        BufferedWriter w = new BufferedWriter(new FileWriter(new File("eula.txt")));
-        w.write("eula=true");
-        w.close();
-        
-        String[] argSub = new String[]{"--nogui"};
-        Class mC = fetchClass("net.minecraft.server.Main");
-        Method mM = mC.getMethod("main", argSub.getClass());
-        mM.invoke(null, (Object) argSub);
-        Thread.sleep(10000);
-    }
-    
-    public static Object readReflective(Object src, String field) throws Exception {
-        return readReflective(src.getClass(), src, field);
-    }
-    
-    public static Object readReflective(Class cls, Object src, String field) throws Exception {
-        Field f = cls.getDeclaredField(field);
-        f.setAccessible(true);
-        return f.get(src);
-    }
-    
-    public static Object invokeReflective(Class cls, Object src, String methode) throws Exception {
-        Method f = cls.getDeclaredMethod(methode);
-        f.setAccessible(true);
-        return f.invoke(src);
-    }
-    
-    public static Object invokeUnknownReflective(Object src, String methode, Object... params) throws Exception {
-        return invokeUnknownReflective(src.getClass(), src, methode, params);
-    }
-    
-    public static Object invokeUnknownReflective(Class cls, Object src, String methode, Object... params) throws Exception {
-        Method m[] = cls.getDeclaredMethods();
-        for(Method me : m) {
-            if(me.getName().equals(methode) && me.getParameterTypes().length == params.length) {
-                me.setAccessible(true);
-                return me.invoke(src, params);
-            }
-        }
-        return invokeUnknownReflective(cls.getSuperclass(), src, methode, params);
-    }
-    
-    public static Object invokeConstructor(Class cls, Object... params) throws Exception {
-        Constructor c[] = cls.getDeclaredConstructors();
-        for(Constructor co : c) {
-            if(co.getParameterTypes().length != params.length) {
-                continue;
-            }
-            boolean allCorrect = true;
-            for(int i = 0; i < params.length; i++) {
-                if(!co.getParameterTypes()[i].isAssignableFrom(params[i].getClass())) {
-                    allCorrect = false;
-                    break;
-                }
-            }
-            if(!allCorrect) continue;
+        try {
+            MRes allOpenList = packRepository.i("openAllSelected");
+            MRes multiPackMgr = ReflectionHelper.c(RES_PACK_MULTI_MGR_PATH).create(
+                    ReflectionHelper.c(RES_PACK_PACK_TYPE_PATH).f("SERVER_DATA"), allOpenList);
             
-            co.setAccessible(true);
-            return co.newInstance(params);
-        }
-        throw new NoSuchMethodException();
-    }
-    
-    public static int getRegistryID(Object data, String registryField) throws Exception {
-        Field f = registryClass.getField(registryField);
-        Object reg = f.get(null);
-        return (int) getID(data, reg);
-    }
-    
-    public static int getID(Object data, Object reg) throws Exception {
-        Object result = reg.getClass().getMethod("getId", Object.class).invoke(reg, data);
-        return (int) result;
-    }
-    
-    public static int readAndGetID(Class cls, Object src, String field, String registryField) throws Exception {
-        Object dat = readReflective(cls, src, field);
-        return getRegistryID(dat, registryField);
-    }
-    
-    public static String findName(Object toFind, String findIn) throws Exception {
-        for(Field f: fetchClass(findIn).getDeclaredFields()) {
-            if(! Modifier.isStatic(f.getModifiers())) continue;
+            MRes regAccess = ReflectionHelper.c(REGISTRY_ACCESS_PATH).i("builtinCopy").i("freeze");
+            MRes result = ReflectionHelper.c(RELOAD_SERVER_RES_PATH).i("loadResources", multiPackMgr, regAccess,
+                    ReflectionHelper.c(COMMANDS_PATH).f("DEDICATED"), serSettings.i("getProperties").f("functionPermissionLevel"),
+                    ReflectionHelper.c(UTIL_PATH).i("backgroundExecutor"), (Executor) Runnable::run)
+                .i("whenComplete", (BiConsumer) (var1x, var2x)-> {
+                    if (var2x != null) {
+                        try {
+                            multiPackMgr.i("close");
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             
-            f.setAccessible(true);
-            if(f.get(null) == toFind) {
-                return f.getName();
-            }
+            MRes datapackRes = result.i("get");
+            datapackRes.i("updateRegistryTags", regAccess);
+            ReflectionHelper.setMainRepository(regAccess);
+        } finally {
+            packRepository.i("close");
         }
-        return null;
     }
-    
-    public static Class<?> fetchClass(String name) throws Exception {
-        return Class.forName(name, true, clsLoader);
-    }
-    
-    public static Class<?> fetchSubClass(String par, String name) throws Exception {
-        Class parClsBeh = fetchClass(par);
-        for(Class i : parClsBeh.getDeclaredClasses()) {
-            if(i.getSimpleName().equals(name)) return i;
+
+    public static JSONArray generateIDs(JSONArray resultAll) {
+        List<String> names = new ArrayList<>();
+        Map<String, JSONObject> nameMap = new HashMap<>();
+        for(int i = 0; i < resultAll.length(); i++) {
+            JSONObject o = resultAll.getJSONObject(i);
+            String n = o.getString("name");
+            names.add(n);
+            nameMap.put(n, o);
         }
-        throw new ClassNotFoundException();
+        names = names.stream().sorted().toList();
+        
+        JSONArray sortedResult = new JSONArray();
+        for(int i = 0; i < names.size(); i++) {
+            JSONObject o = nameMap.get(names.get(i));
+            o.put("id", i);
+            sortedResult.put(o);
+        }
+        return sortedResult;
     }
     
     public static void writePart(String globalPath, JSONArray data) throws Exception {
         if(!globalPath.endsWith(".json")) {
             globalPath+= ".json";
         }
+        JSONArray sorted = new JSONArray();
+        for(int i = 0; i < data.length(); i++) {
+            for(int j = 0; j < data.length(); j++) {
+                if(data.getJSONObject(j).getInt("id") == i) {
+                    sorted.put(data.getJSONObject(j));
+                    break;
+                }
+            }
+        }
+        
         File target = new File(DESTINATION_TMP_PATH + File.separator + globalPath);
         target.getParentFile().mkdirs();
         try (FileWriter writer = new FileWriter(target)) {
-            data.write(writer, 4, 0);
+            sorted.write(writer, 4, 0);
         }
     }
     
@@ -358,18 +285,6 @@ public class Main {
                 throw new UnsupportedOperationException("invalid data type(" + data.getClass() + ") found at " + source);
             }
         }
-    }
-    
-    //TODO delete only for debugging / developement
-    private static JSONObject dumpClass(Class toDo, Object instance) throws Exception {
-        JSONObject result = new JSONObject();
-        for(Field f : toDo.getDeclaredFields()) {
-            if(Modifier.isStatic(f.getModifiers())) continue;
-            f.setAccessible(true);
-            
-            result.put(f.getName(), f.get(instance));
-        }
-        return result;
     }
     
     /**

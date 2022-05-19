@@ -1,6 +1,8 @@
 package com.parallelcraft.datapack.types;
 
 import com.parallelcraft.datapack.Main;
+import com.parallelcraft.datapack.reflection.MRes;
+import com.parallelcraft.datapack.reflection.ReflectionHelper;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
@@ -11,45 +13,40 @@ import org.json.JSONObject;
  * @author extremeCrazyCoder
  */
 public class Blocks {
-    public static final String OUTPUT_PATH = "world/blocks";
+    private static final String OUTPUT_PATH = "world/blocks";
     
-    public static final String BLOCK_SETTINGS_PATH = "net.minecraft.world.level.block.state.BlockBehaviour";
-    public static final String SOUND_TYPE_PATH = "net.minecraft.world.level.block.SoundType";
-
-    public static final String REGISTRY_NAME = "BLOCK";
+    public static final String REGISTRY_NAME = "BLOCK_REGISTRY";
     
-    public static void generateDatapackPart(Class registryClass) throws Exception {
+    public static void generateDatapackPart() throws Exception {
         System.out.println("Generating BLOCK part");
-        Field f = registryClass.getField(REGISTRY_NAME);
-        Object obj = f.get(null);
         
-        Class clsBeh = Main.fetchClass(BLOCK_SETTINGS_PATH);
+        MRes registry = ReflectionHelper.getRegistry(REGISTRY_NAME);
+        
         JSONArray resultAll = new JSONArray();
-
-        Set<Map.Entry<?, ?>> entries = (Set<Map.Entry<?, ?>>) obj.getClass().getMethod("entrySet").invoke(obj);
-        for(Map.Entry<?, ?> entry : entries) {
-            Object loc = entry.getKey().getClass().getMethod("location").invoke(entry.getKey());
-            String name = (String) (loc.getClass().getMethod("getPath").invoke(loc));
+        MRes entries = registry.i("entrySet");
+        for(MRes entry : entries) {
+            MRes loc = entry.i("getKey").i("location");
+            String name = loc.i("getPath").aStr();
             
             JSONObject result = new JSONObject();
             result.put("name", name);
             
-            Object val = entry.getValue();
-            result.put("id", Main.getRegistryID(val, REGISTRY_NAME));
+            MRes val = entry.i("getValue");
+            result.put("id", registry.i("getId", val).aI());
             
             JSONObject element = new JSONObject();
-            element.put("asItem", Main.getRegistryID(Main.invokeReflective(clsBeh, val, "asItem"), Items.REGISTRY_NAME));
+            element.put("asItem", ReflectionHelper.getRegistryID(val.i("asItem"), Items.REGISTRY_NAME));
             
-            element.put("jumpFactor", (float) Main.readReflective(clsBeh, val, "jumpFactor"));
-            element.put("speedFactor", (float) Main.readReflective(clsBeh, val, "speedFactor"));
-            element.put("friction", (float) Main.readReflective(clsBeh, val, "friction"));
-            element.put("explosionResistance", (float) Main.readReflective(clsBeh, val, "explosionResistance"));
-            element.put("destroyTime", (float) Main.invokeReflective(clsBeh, val, "defaultDestroyTime"));
-            element.put("hasCollision", (boolean) Main.readReflective(clsBeh, val, "hasCollision"));
-            Object props = Main.readReflective(clsBeh, val, "properties");
-            element.put("isAir", (boolean) Main.readReflective(props.getClass(), props, "isAir"));
-            element.put("soundType", Main.findName(Main.readReflective(clsBeh, val, "soundType"), SOUND_TYPE_PATH));
-            element.put("material", Main.findName(Main.readReflective(clsBeh, val, "material"), BlockMaterials.MATERIAL_PATH));
+            element.put("jumpFactor", val.f("jumpFactor").aF());
+            element.put("speedFactor", val.f("speedFactor").aF());
+            element.put("friction", val.f("friction").aF());
+            element.put("explosionResistance", val.f("explosionResistance").aF());
+            element.put("destroyTime", val.i("defaultDestroyTime").aF());
+            element.put("hasCollision", val.f("hasCollision").aB());
+            MRes props = val.f("properties");
+            element.put("isAir", props.f("isAir").aB());
+            element.put("soundType", ReflectionHelper.c(Sounds.SOUND_TYPE_PATH).findName(val.f("soundType")));
+            element.put("material", ReflectionHelper.c(BlockMaterials.MATERIAL_PATH).findName(val.f("material")));
             
             result.put("element", element);
             resultAll.put(result);

@@ -1,11 +1,8 @@
 package com.parallelcraft.datapack.types;
 
 import com.parallelcraft.datapack.Main;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import com.parallelcraft.datapack.reflection.MRes;
+import com.parallelcraft.datapack.reflection.ReflectionHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -13,32 +10,21 @@ import org.json.JSONObject;
  * @author extremeCrazyCoder
  */
 public class BlockState {
-    public static final String OUTPUT_PATH = "world/block_state";
+    private static final String OUTPUT_PATH = "world/block_state";
     
-    public static final String BLOCK_PATH = "net.minecraft.world.level.block.Block";
-    public static final String STATE_PATH = "net.minecraft.world.level.block.state.StateHolder";
+    private static final String BLOCK_PATH = "net.minecraft.world.level.block.Block";
+    private static final String FIELD_NAME = "BLOCK_STATE_REGISTRY";
 
-    public static void generateDatapackPart(Class registryClass) throws Exception {
-        System.out.println("Generating BLOCK_StATE part");
-        Class clsReg = Main.fetchClass(BLOCK_PATH);
-        Field f = clsReg.getField("BLOCK_STATE_REGISTRY");
-        Iterable<?> obj = (Iterable<?>) f.get(null);
+    public static void generateDatapackPart() throws Exception {
+        System.out.println("Generating BLOCK_STATE part");
         
-        Class stHol = Main.fetchClass(STATE_PATH);
-        Class stBase = Main.fetchSubClass(Blocks.BLOCK_SETTINGS_PATH, "BlockStateBase");
-        Method idMethod = obj.getClass().getMethod("getId", Object.class);
-        
-        Object blockRegistry = registryClass.getField("BLOCK").get(null);
-        Method blRegResKey = blockRegistry.getClass().getMethod("getResourceKey", Object.class);
+        MRes registry = ReflectionHelper.c(BLOCK_PATH).f(FIELD_NAME);
         
         JSONArray resultAll = new JSONArray();
-        
-        for(Object entry : obj) {
-            int id = (int) idMethod.invoke(obj, entry);
-            Optional<?> blNamePathOpt = (Optional<?>) blRegResKey.invoke(blockRegistry, Main.readReflective(stHol, entry, "owner"));
-            Object blNamePath = blNamePathOpt.get();
-            Object blLoc = blNamePath.getClass().getMethod("location").invoke(blNamePath);
-            String blName = (String) (blLoc.getClass().getMethod("getPath").invoke(blLoc));
+        for(MRes entry : registry) {
+            int id = registry.i("getId", entry).aI();
+            MRes blNamePathOpt = ReflectionHelper.getRegistry(Blocks.REGISTRY_NAME).i("getResourceKey", entry.f("owner"));
+            String blName = blNamePathOpt.i("get").i("location").i("getPath").get().toString();
             String name = blName + "_" + id;
             
             JSONObject result = new JSONObject();
@@ -46,32 +32,31 @@ public class BlockState {
             result.put("id", id);
             
             JSONObject element = new JSONObject();
-            element.put("blockId", Main.getRegistryID(Main.readReflective(stHol, entry, "owner"), Blocks.REGISTRY_NAME));
-            element.put("canOcclude", (boolean) Main.readReflective(stBase, entry, "canOcclude"));
-            element.put("useShapeForLightOcclusion", (boolean) Main.readReflective(stBase, entry, "useShapeForLightOcclusion"));
-            element.put("isAir", (boolean) Main.readReflective(stBase, entry, "isAir"));
-            element.put("lightEmission", (int) Main.readReflective(stBase, entry, "lightEmission"));
-            element.put("destroySpeed", (float) Main.readReflective(stBase, entry, "destroySpeed"));
+            element.put("blockId", ReflectionHelper.getRegistryID(entry.f("owner"), Blocks.REGISTRY_NAME));
+            element.put("canOcclude", entry.f("canOcclude").aB());
+            element.put("useShapeForLightOcclusion", entry.f("useShapeForLightOcclusion").aB());
+            element.put("isAir", entry.f("isAir").aB());
+            element.put("lightEmission", entry.f("lightEmission").aI());
+            element.put("destroySpeed", entry.f("destroySpeed").aF());
             
-            Object values = Main.readReflective(stHol, entry, "values"); //RegularImmutableBiMap
+            MRes values = entry.f("values"); //RegularImmutableBiMap
             JSONObject jValues = new JSONObject();
-            for(Map.Entry<?, ?> vEnt : (Set<Map.Entry<?, ?>>) Main.invokeUnknownReflective(values, "entrySet")) {
-                String key = Main.invokeUnknownReflective(vEnt.getKey(), "getName").toString();
-                Object val = vEnt.getValue();
-                jValues.put(key, val.toString());
+            for(MRes vEnt : values.i("entrySet")) {
+                String key = vEnt.i("getKey").i("getName").get().toString();
+                Object val = vEnt.i("getValue").get().toString();
+                jValues.put(key, val);
             }
             element.put("values", jValues);
             
-            Object neighbours = Main.readReflective(stHol, entry, "neighbours"); //HashBasedTable
+            MRes neighbours = entry.f("neighbours"); //HashBasedTable
             JSONObject jNeighbours = new JSONObject();
-            Map<?, Map<?, ?>> rMap = (Map<?, Map<?, ?>>) Main.invokeUnknownReflective(neighbours, "rowMap");
-            for(Map.Entry<?, Map<?, ?>> nEnt : rMap.entrySet()) {
-                String key = Main.invokeUnknownReflective(nEnt.getKey(), "getName").toString();
+            for(MRes nEnt : neighbours.i("rowMap").i("entrySet")) {
+                String key = nEnt.i("getKey").i("getName").get().toString();
                 JSONObject contents = new JSONObject();
-                for(Map.Entry<?, ?> cEnt : nEnt.getValue().entrySet()) {
-                    int cEntId = (int) idMethod.invoke(obj, cEnt.getValue());
+                for(MRes cEnt : nEnt.i("getValue").i("entrySet")) {
+                    int cEntId = registry.i("getId", cEnt.i("getValue")).aI();
                     if(cEntId >= 0) {
-                        contents.put(cEnt.getKey().toString(), cEntId);
+                        contents.put(cEnt.i("getKey").get().toString(), cEntId);
                     }
                 }
                 jNeighbours.put(key, contents);
